@@ -14,6 +14,7 @@ func somefunc() {
 	fmt.Println("funcs are ignored")
 }
 
+// This is the root struct
 type Kingdom struct {
 	// Some animal
 	Animal Animal
@@ -50,4 +51,9 @@ type AnotherThing struct {
 
 type Blah struct {
 	Bar string
+}
+
+// This is another root struct
+type SecondRootStruct struct {
+	Name string
 }

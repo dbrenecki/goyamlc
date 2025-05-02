@@ -1,11 +1,20 @@
 package main
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
 
 const (
-	typesPath = "test/types.go"
+	typesPath = "test/data/types.go"
 )
 
 func Test_generate(t *testing.T) {
-	_ = generate(typesPath)
+	err := ConfigureLogger("debug")
+	require.NoError(t, err)
+
+	err = generate(typesPath)
+	assert.NoError(t, err)
 }
