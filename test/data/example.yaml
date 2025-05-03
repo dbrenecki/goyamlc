@@ -1,1 +1,5 @@
-Kingdom: {}
+---
+# This is the root struct
+# Second line for rootstruct
+kingdomHouse:
+  # Some animal

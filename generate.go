@@ -81,7 +81,9 @@ func generate(typesPath string) error {
 	}
 	log.Info().Msgf(`root structs are %s`, rootStructs)
 
-	createStructsForYaml(rootStructs, f)
+	if err = createStructsForYaml(rootStructs, f); err != nil {
+		return err
+	}
 	return nil
 }
 

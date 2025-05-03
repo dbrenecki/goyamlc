@@ -3,9 +3,9 @@ package test
 import "fmt"
 
 type Animal struct {
-	Name    string
-	Legs    int
-	Species Species
+	Name string
+	Legs int
+	// Species Species
 }
 
 var _ = somefunc
@@ -15,45 +15,46 @@ func somefunc() {
 }
 
 // This is the root struct
-type Kingdom struct {
+// Second line for rootstruct
+type KingdomHouse struct {
 	// Some animal
 	Animal Animal
 	Name   string
-	Plants []Plant
+	// Plants []Plant
 }
 
-type Plant struct {
-	Ipsom     string
-	Color     []string
-	MiniPlant MiniPlant
-}
+// type Plant struct {
+// 	Ipsom     string
+// 	Color     []string
+// 	MiniPlant MiniPlant
+// }
 
-type Species struct {
-	Something map[string]any
-	Continent string
-	IsExtinct bool
-}
+// type Species struct {
+// 	Something map[string]any
+// 	Continent string
+// 	IsExtinct bool
+// }
 
-type MiniPlant struct {
-	PlantType    string
-	LeaveTypes   []LeaveTypes
-	AnotherThing AnotherThing
-	StrangeMap   map[string]Blah
-}
+// type MiniPlant struct {
+// 	PlantType    string
+// 	LeaveTypes   []LeaveTypes
+// 	AnotherThing AnotherThing
+// 	StrangeMap   map[string]Blah
+// }
 
-type LeaveTypes struct {
-	Color string
-}
+// type LeaveTypes struct {
+// 	Color string
+// }
 
-type AnotherThing struct {
-	Foobar string
-}
+// type AnotherThing struct {
+// 	Foobar string
+// }
 
-type Blah struct {
-	Bar string
-}
+// type Blah struct {
+// 	Bar string
+// }
 
-// This is another root struct
-type SecondRootStruct struct {
-	Name string
-}
+// // This is another root struct
+// type SecondRootStruct struct {
+// 	Name string
+// }

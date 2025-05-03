@@ -3,10 +3,8 @@ package main
 import (
 	"fmt"
 	"go/ast"
-	"os"
 
 	"github.com/rs/zerolog/log"
-	"gopkg.in/yaml.v3"
 )
 
 type FieldInfo struct {
@@ -16,44 +14,44 @@ type FieldInfo struct {
 	yamlType    string                `yaml:"yaml_type"`
 }
 
-func createStructsForYaml(rootStructs []string, f *ast.File) {
-	for _, name := range rootStructs {
-		createStructForYaml(name, f)
-	}
-}
+// func createStructsForYaml(rootStructs []string, f *ast.File) {
+// 	for _, name := range rootStructs {
+// 		createStructForYaml(name, f)
+// 	}
+// }
 
-func createStructForYaml(name string, f *ast.File) {
-	fieldInfos := make(map[string]*FieldInfo)
-	for _, decl := range f.Decls {
-		var genDecl *ast.GenDecl
-		genDecl, ok := decl.(*ast.GenDecl)
-		if !ok {
-			log.Debug().Msgf(`ast.Decl: "%T" is not of "*ast.Decl" type, skipping`, decl)
-			_ = ok
-			continue
-		}
-		for _, s := range genDecl.Specs {
-			typeSpec, ok := s.(*ast.TypeSpec)
-			if !ok {
-				log.Debug().Msgf(`ast.Spec: "%T" is not of "*ast.TypeSpec" type, skipping`, decl)
-				continue
-			}
-			if typeSpec.Name.Name != name {
-				continue
-			}
-			fieldInfos[name] = &FieldInfo{}
-			constructFieldInfo(fieldInfos[name], typeSpec)
-		}
-	}
+// func createStructForYaml(name string, f *ast.File) {
+// 	fieldInfos := make(map[string]*FieldInfo)
+// 	for _, decl := range f.Decls {
+// 		var genDecl *ast.GenDecl
+// 		genDecl, ok := decl.(*ast.GenDecl)
+// 		if !ok {
+// 			log.Debug().Msgf(`ast.Decl: "%T" is not of "*ast.Decl" type, skipping`, decl)
+// 			_ = ok
+// 			continue
+// 		}
+// 		for _, s := range genDecl.Specs {
+// 			typeSpec, ok := s.(*ast.TypeSpec)
+// 			if !ok {
+// 				log.Debug().Msgf(`ast.Spec: "%T" is not of "*ast.TypeSpec" type, skipping`, decl)
+// 				continue
+// 			}
+// 			if typeSpec.Name.Name != name {
+// 				continue
+// 			}
+// 			fieldInfos[name] = &FieldInfo{}
+// 			constructFieldInfo(fieldInfos[name], typeSpec)
+// 		}
+// 	}
 
-	out, err := yaml.Marshal(fieldInfos)
-	if err != nil {
-		panic(err)
-	}
-	if err := os.WriteFile("test/data/example.yaml", out, 0644); err != nil {
-		panic(err)
-	}
-}
+// 	out, err := yaml.Marshal(fieldInfos)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	if err := os.WriteFile("test/data/example.yaml", out, 0644); err != nil {
+// 		panic(err)
+// 	}
+// }
 
 func constructFieldInfo(fieldInfo *FieldInfo, typeSpec *ast.TypeSpec) {
 	structType, ok := typeSpec.Type.(*ast.StructType)

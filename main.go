@@ -7,6 +7,5 @@ func main() {
 
 	if err := generate(""); err != nil {
 		panic(err)
-
 	}
 }
