@@ -6,10 +6,6 @@ import (
 	"fmt"
 	"go/ast"
 	"os"
-	"slices"
-	"strings"
-
-	"github.com/rs/zerolog/log"
 
 	"github.com/dbrenecki/goyamlc/pkg/util"
 )
@@ -42,7 +38,7 @@ func createStructsForYaml(rootStructs []string, f *ast.File) (err error) {
 
 	isArr := util.PtrTo(false)
 	for _, name := range rootStructs {
-		if err := w.walkAst(name, f.Decls[:], isArr); err != nil {
+		if err := w.walkDecl(name, f.Decls[:], isArr); err != nil {
 			return err
 		}
 	}
@@ -53,10 +49,11 @@ func createStructsForYaml(rootStructs []string, f *ast.File) (err error) {
 	return nil
 }
 
-// walkAst recursively walks the Abstract Syntax Tree
-func (w formatWriter) walkAst(name string, decls []ast.Decl, isArr *bool) error {
+// walkDecl recursively walks the Decl Abstract Syntax Tree removing previously
+// traversed nodes as part of each recursion.
+func (w formatWriter) walkDecl(name string, decls []ast.Decl, isArr *bool) error {
 	var err error
-	for i, decl := range decls {
+	for _, decl := range decls {
 		genDecl, ok := decl.(*ast.GenDecl)
 		if !ok {
 			// skips non "*ast.GenDecl" types
@@ -90,7 +87,7 @@ func (w formatWriter) walkAst(name string, decls []ast.Decl, isArr *bool) error 
 			}
 		}
 
-		if err = w.writeField(typeSpec.Name.Name, "", isArr); err != nil {
+		if err = w.writeField(typeSpec.Name.Name, "", false, isArr); err != nil {
 			return err
 		}
 
@@ -100,107 +97,117 @@ func (w formatWriter) walkAst(name string, decls []ast.Decl, isArr *bool) error 
 			return fmt.Errorf(`"%T" is not an "*ast.StructType"`, typeSpec.Type)
 		}
 
-		w.indentCount += 2
-		for _, field := range structType.Fields.List {
-			if field.Doc != nil {
-				for _, c := range field.Doc.List {
-					// write field comment
-					if err = w.writeComment(c); err != nil {
-						return err
-					}
-				}
-			}
+		if err = w.walkTypeSpec(structType.Fields.List, isArr); err != nil {
+			return err
+		}
 
-			switch t := field.Type.(type) {
-			case *ast.Ident:
-				if t.Obj != nil {
-					newDecls := decls[:]
-					newDecls = slices.Delete(newDecls, i, i+1)
+		// newDecls := decls[:]
+		// newDecls = slices.Delete(newDecls, i, i+1)
+	}
+	return nil
+}
 
-					if err = w.walkAst(field.Names[0].Name, newDecls, isArr); err != nil {
-						return err
-					}
-				} else {
-					if !ok {
-						log.Debug().Msgf(`ast.Expr: "%T" is not a "*ast.Ident", skipping`, field.Type)
-						continue
-					}
-
-					if err = w.writeField(field.Names[0].Name, t.Name, isArr); err != nil {
-						return err
-					}
-				}
-			case *ast.MapType:
-				identKey, ok := t.Key.(*ast.Ident)
-				if !ok {
-					return errors.New("map keys should always have ident types")
-				}
-				identValue, ok := t.Value.(*ast.Ident)
-				if !ok {
-					return errors.New("map values should always have ident types")
-				}
-
-				if err = w.writeField(field.Names[0].Name, "map["+identKey.Name+"]"+identValue.Name, isArr); err != nil {
+func (w formatWriter) walkTypeSpec(fields []*ast.Field, isArr *bool) error {
+	var err error
+	w.indentCount += 2
+	for _, field := range fields {
+		var isObj bool
+		if field.Doc != nil {
+			for _, c := range field.Doc.List {
+				// write field comment
+				if err = w.writeComment(c); err != nil {
 					return err
-				}
-			case *ast.ArrayType:
-				identElt, ok := t.Elt.(*ast.Ident)
-				if !ok {
-					return errors.New("array types should always have ident types")
-				}
-
-				if identElt.Obj == nil {
-					if err = w.writeField(field.Names[0].Name, identElt.Name, isArr); err != nil {
-						return err
-					}
-				} else {
-					newDecls := decls[:]
-					newDecls = slices.Delete(newDecls, i, i+1)
-					*isArr = true
-					if err = w.walkAst(field.Names[0].Name, newDecls, isArr); err != nil {
-						return err
-					}
-					*isArr = false
 				}
 			}
 		}
-	}
-	return nil
-}
 
-func (w formatWriter) formatCamelCase(s string) string {
-	camelWindow := 1
-	indentCount := w.indentCount
-	if len(s) > 0 && s[0] == '-' {
-		camelWindow = 3
-		indentCount += 2
-	}
-	return strings.Repeat(" ", indentCount) + strings.ToLower(s[:camelWindow]+s[camelWindow:])
-}
+		switch t := field.Type.(type) {
+		case *ast.Ident:
+			if t.Obj != nil {
+				isObj = true
+				if err = w.writeField(field.Names[0].Name, t.Name, isObj, isArr); err != nil {
+					return err
+				}
+				// newDecls := decls[:]
+				// newDecls = slices.Delete(newDecls, i, i+1)
+				typeSpec, ok := t.Obj.Decl.(*ast.TypeSpec)
+				if !ok {
+					return fmt.Errorf(`"%T" is not a "*ast.TypeSpec" type`, t.Obj.Decl)
+				}
+				structType, ok := typeSpec.Type.(*ast.StructType)
+				if !ok {
+					return fmt.Errorf(`"%T" is not a "*ast.StructType" type`, typeSpec.Type)
+				}
+				fields := structType.Fields.List
+				if err = w.walkTypeSpec(fields, isArr); err != nil {
+					return err
+				}
+			} else {
+				if err = w.writeField(field.Names[0].Name, t.Name, isObj, isArr); err != nil {
+					return err
+				}
+			}
+		case *ast.MapType:
+			identKey, ok := t.Key.(*ast.Ident)
+			if !ok {
+				return errors.New("map keys should always have ident types")
+			}
+			identValue, ok := t.Value.(*ast.Ident)
+			if !ok {
+				return errors.New("map values should always have ident types")
+			}
 
-// writeComment converts a golang comment to a yaml comment and writes to the buffer.
-func (w formatWriter) writeComment(astCmt *ast.Comment) error {
-	golangCmt := "//"
-	if !strings.HasPrefix(astCmt.Text, golangCmt) {
-		return fmt.Errorf("ast comment does not start with %#v", golangCmt)
-	}
-	cmt := strings.Replace(astCmt.Text, golangCmt, "#", 1)
-	_, err := w.WriteString(strings.Repeat(" ", w.indentCount) + cmt + "\n")
-	if err != nil {
-		return err
-	}
-	return nil
-}
+			if err = w.writeField(field.Names[0].Name, "map["+identKey.Name+"]"+identValue.Name, isObj, isArr); err != nil {
+				return err
+			}
+		case *ast.ArrayType:
+			identElt, ok := t.Elt.(*ast.Ident)
+			if !ok {
+				return errors.New("array types should always have ident types")
+			}
+			*isArr = true
 
-func (w formatWriter) writeField(name string, typeName string, isArr *bool) error {
-	if *isArr {
-		name = "- " + name
-		*isArr = false
-	}
+			if identElt.Obj == nil {
+				if err = w.writeField(field.Names[0].Name, identElt.Name, isObj, isArr); err != nil {
+					return err
+				}
+			} else {
+				ident, ok := t.Elt.(*ast.Ident)
+				if !ok {
+					return fmt.Errorf(`"%T" is not a "*ast.Ident" type`, t.Elt)
+				}
+				typeSpec, ok := ident.Obj.Decl.(*ast.TypeSpec)
+				if !ok {
+					return fmt.Errorf(`"%T" is not a "*ast.TypeSpec" type`, ident.Obj.Decl)
+				}
+				structType, ok := typeSpec.Type.(*ast.StructType)
+				if !ok {
+					return fmt.Errorf(`"%T" is not a "*ast.StructType" type`, typeSpec.Type)
+				}
 
-	_, err := w.WriteString(w.formatCamelCase(name) + ": " + typeName + "\n")
-	if err != nil {
-		return err
+				name := w.formatCamelCase(field.Names[0].Name) + ": " + "\n"
+				_, err := w.WriteString(name)
+				if err != nil {
+					return err
+				}
+				if err = w.walkTypeSpec(structType.Fields.List, isArr); err != nil {
+					return err
+				}
+
+				// if err = w.writeField(field.Names[0].Name, identElt.Name, isObj, isArr); err != nil {
+				// 	return err
+				// }
+
+				// identElt.Obj.Type
+
+				// newDecls := decls[:]
+				// newDecls = slices.Delete(newDecls, i, i+1)
+				// if err = w.walkAst(field.Names[0].Name, newDecls, isArr); err != nil {
+				// 	return err
+				// }
+			}
+			*isArr = false
+		}
 	}
 	return nil
 }
