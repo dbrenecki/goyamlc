@@ -1,0 +1,6 @@
+---
+# should match "pull_request" triggers in ".github/workflows/labeler.yaml"
+go:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.go"
