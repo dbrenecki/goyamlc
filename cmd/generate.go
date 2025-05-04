@@ -8,7 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func Generate(typesPath string, testHook func(fs *token.FileSet, f *ast.File) error) error {
+func Generate(typesPath, genPath string, testHook func(fs *token.FileSet, f *ast.File) error) error {
 	fs := token.NewFileSet()
 
 	f, err := parser.ParseFile(fs, typesPath, nil, parser.AllErrors|parser.ParseComments)
@@ -28,7 +28,7 @@ func Generate(typesPath string, testHook func(fs *token.FileSet, f *ast.File) er
 	}
 	log.Info().Msgf(`root structs are %s`, rootStructs)
 
-	if err = createStructsForYaml(rootStructs, f); err != nil {
+	if err = createStructsForYaml(rootStructs, f, genPath); err != nil {
 		return err
 	}
 	return nil

@@ -7,14 +7,7 @@ import (
 )
 
 func (w formatWriter) formatCamelCase(s string) string {
-	camelWindow := 1
-	indentCount := w.indentCount
-	if len(s) > 0 && false {
-		fmt.Println("camel str", s)
-		camelWindow = 3
-		indentCount += 2
-	}
-	return strings.Repeat(" ", indentCount) + strings.ToLower(s[:camelWindow]+s[camelWindow:])
+	return strings.Repeat(" ", w.indentCount) + strings.ToLower(s[:1]) + s[1:]
 }
 
 // writeComment converts a golang comment to a yaml comment and writes to the buffer.

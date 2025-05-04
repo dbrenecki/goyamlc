@@ -18,9 +18,8 @@ type formatWriter struct {
 	indentCount int
 }
 
-func createStructsForYaml(rootStructs []string, f *ast.File) (err error) {
-	// TODO: this should be cobra input
-	file, err := os.Create("../test/data/generated.yaml")
+func createStructsForYaml(rootStructs []string, f *ast.File, path string) (err error) {
+	file, err := os.Create(path)
 
 	defer func() {
 		if tempErr := file.Close(); tempErr != nil && err == nil {
