@@ -1,8 +1,19 @@
 # goyamlc
 
-go yaml marshaler with comments (WIP).
+goyaml marshaler, but with comments!
 
-Example
+goyamlc uses the Abstract Syntax Tree (AST) to maintain comments from structs to yaml.
+
+This is useful for generating docs or examples in yaml whilst maintaining a single location of comments.
+
+
+## How To use
+
+```bash
+go install github.com/dbrenecki/goyamlc@latest
+```
+
+Define your structs in one file which is your `--types-path`
 
 ```go
 type Foo struct {
@@ -13,7 +24,12 @@ type Foo struct {
 }
 ```
 
-Would generate:
+Set the location to generate the yaml and run:
+```bash
+goyamlc  --types-path=<your-types-path> --gen-path=<your-yaml-path>
+```
+
+Which should generate e.g.
 
 ```yaml
 foo:
@@ -23,11 +39,11 @@ foo:
   y: string
 ```
 
-See the [example](./test/data/generated.yaml) for a more complete example which includes nested types.
+See [example](./test/data/generated.yaml) for an example generation.
 
 
 ## Upcoming Features
 
-- Make gen order deterministic
+- Make gen order deterministic (bug)
 - Ignore unexported fields
 - Improve how map types are represented
