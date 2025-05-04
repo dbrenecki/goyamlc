@@ -9,6 +9,11 @@ gobuild:
 run: gobuild
 	./build/goyamlc .
 
+# ======== Test ========
+.PHONY: test
+test: gobuild
+	@CGO_ENABLED=0 go test -v -count 1 ./...
+
 # ======== Lint ========
 LINT_DISABLE_ERR ?= true
 define lint

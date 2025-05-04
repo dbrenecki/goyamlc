@@ -12,7 +12,8 @@ animal:
     # Some animal type.
     plant:
       ipsom: string
-      color: array of string
+      color:
+array of string
       species:
         something: map[string]any
         continent: string
