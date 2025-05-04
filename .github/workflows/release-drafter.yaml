@@ -1,0 +1,20 @@
+---
+name: 🎱 Release Drafter
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  update:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: release-drafter/release-drafter@v6
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        # not using inbuilt labeler due to it having to exist on default branch (chicken-egg)
+        with:
+          config-name: release-drafter.yaml

@@ -37,6 +37,7 @@ func Test_generate(t *testing.T) {
 		return nil
 	}
 
-	err = Generate(typesPath, testHook)
+	filename := "../test/data/generated.yaml"
+	err = Generate(typesPath, filename, testHook)
 	assert.NoError(t, err)
 }

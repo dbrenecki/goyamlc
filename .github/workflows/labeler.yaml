@@ -1,0 +1,22 @@
+---
+name: 🏷️ Labeler
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "**/*.go"
+
+jobs:
+  labeler:
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/labeler@v5
+        with:
+          configuration-path: .github/labeler.yaml
+          sync-labels: true

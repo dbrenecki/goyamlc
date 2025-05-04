@@ -7,7 +7,7 @@ gobuild:
 
 .PHONY: run
 run: gobuild
-	./build/goyamlc .
+	./build/goyamlc --types-path=test/data/types.go --gen-path=test/data/generated.yaml
 
 # ======== Test ========
 .PHONY: test

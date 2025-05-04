@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"go/ast"
 	"os"
+	"strings"
 
 	"github.com/dbrenecki/goyamlc/pkg/util"
 )
@@ -17,9 +18,8 @@ type formatWriter struct {
 	indentCount int
 }
 
-func createStructsForYaml(rootStructs []string, f *ast.File) (err error) {
-	// TODO: this should be cobra input
-	file, err := os.Create("../test/data/generated.yaml")
+func createStructsForYaml(rootStructs []string, f *ast.File, path string) (err error) {
+	file, err := os.Create(path)
 
 	defer func() {
 		if tempErr := file.Close(); tempErr != nil && err == nil {
@@ -38,7 +38,7 @@ func createStructsForYaml(rootStructs []string, f *ast.File) (err error) {
 
 	isArr := util.PtrTo(false)
 	for _, name := range rootStructs {
-		if err := w.walkDecl(name, f.Decls[:], isArr); err != nil {
+		if err := w.walkDecl(name, f.Decls, isArr); err != nil {
 			return err
 		}
 	}
@@ -87,7 +87,9 @@ func (w formatWriter) walkDecl(name string, decls []ast.Decl, isArr *bool) error
 			}
 		}
 
-		if err = w.writeField(typeSpec.Name.Name, "", false, isArr); err != nil {
+		str := w.formatCamelCase(typeSpec.Name.Name) + ": " + "\n"
+		_, err = w.WriteString(str)
+		if err != nil {
 			return err
 		}
 
@@ -97,7 +99,7 @@ func (w formatWriter) walkDecl(name string, decls []ast.Decl, isArr *bool) error
 			return fmt.Errorf(`"%T" is not an "*ast.StructType"`, typeSpec.Type)
 		}
 
-		if err = w.walkTypeSpec(structType.Fields.List, isArr); err != nil {
+		if err = w.walkTypeSpec(structType.Fields.List); err != nil {
 			return err
 		}
 
@@ -105,11 +107,10 @@ func (w formatWriter) walkDecl(name string, decls []ast.Decl, isArr *bool) error
 	return nil
 }
 
-func (w formatWriter) walkTypeSpec(fields []*ast.Field, isArr *bool) error {
+func (w formatWriter) walkTypeSpec(fields []*ast.Field) error {
 	var err error
 	w.indentCount += 2
 	for _, field := range fields {
-		var isObj bool
 		if field.Doc != nil {
 			for _, c := range field.Doc.List {
 				// write field comment
@@ -122,10 +123,12 @@ func (w formatWriter) walkTypeSpec(fields []*ast.Field, isArr *bool) error {
 		switch t := field.Type.(type) {
 		case *ast.Ident:
 			if t.Obj != nil {
-				isObj = true
-				if err = w.writeField(field.Names[0].Name, t.Name, isObj, isArr); err != nil {
+				str := w.formatCamelCase(field.Names[0].Name) + ": " + "\n"
+				_, err = w.WriteString(str)
+				if err != nil {
 					return err
 				}
+
 				typeSpec, ok := t.Obj.Decl.(*ast.TypeSpec)
 				if !ok {
 					return fmt.Errorf(`"%T" is not a "*ast.TypeSpec" type`, t.Obj.Decl)
@@ -135,11 +138,13 @@ func (w formatWriter) walkTypeSpec(fields []*ast.Field, isArr *bool) error {
 					return fmt.Errorf(`"%T" is not a "*ast.StructType" type`, typeSpec.Type)
 				}
 				fields := structType.Fields.List
-				if err = w.walkTypeSpec(fields, isArr); err != nil {
+				if err = w.walkTypeSpec(fields); err != nil {
 					return err
 				}
 			} else {
-				if err = w.writeField(field.Names[0].Name, t.Name, isObj, isArr); err != nil {
+				str := w.formatCamelCase(field.Names[0].Name) + ": " + t.Name + "\n"
+				_, err = w.WriteString(str)
+				if err != nil {
 					return err
 				}
 			}
@@ -153,7 +158,9 @@ func (w formatWriter) walkTypeSpec(fields []*ast.Field, isArr *bool) error {
 				return errors.New("map values should always have ident types")
 			}
 
-			if err = w.writeField(field.Names[0].Name, "map["+identKey.Name+"]"+identValue.Name, isObj, isArr); err != nil {
+			str := w.formatCamelCase(field.Names[0].Name) + ": " + "map[" + identKey.Name + "]" + identValue.Name + "\n"
+			_, err = w.WriteString(str)
+			if err != nil {
 				return err
 			}
 		case *ast.ArrayType:
@@ -161,10 +168,11 @@ func (w formatWriter) walkTypeSpec(fields []*ast.Field, isArr *bool) error {
 			if !ok {
 				return errors.New("array types should always have ident types")
 			}
-			*isArr = true
 
 			if identElt.Obj == nil {
-				if err = w.writeField(field.Names[0].Name, identElt.Name, isObj, isArr); err != nil {
+				str := w.formatCamelCase(field.Names[0].Name) + ":\n" + strings.Repeat(" ", w.indentCount+2) + "- " + identElt.Name + "\n"
+				_, err = w.WriteString(str)
+				if err != nil {
 					return err
 				}
 			} else {
@@ -181,16 +189,15 @@ func (w formatWriter) walkTypeSpec(fields []*ast.Field, isArr *bool) error {
 					return fmt.Errorf(`"%T" is not a "*ast.StructType" type`, typeSpec.Type)
 				}
 
-				name := w.formatCamelCase(field.Names[0].Name) + ": " + "\n"
-				_, err := w.WriteString(name)
+				str := w.formatCamelCase(field.Names[0].Name) + ": " + "\n"
+				_, err := w.WriteString(str)
 				if err != nil {
 					return err
 				}
-				if err = w.walkTypeSpec(structType.Fields.List, isArr); err != nil {
+				if err = w.walkTypeSpec(structType.Fields.List); err != nil {
 					return err
 				}
 			}
-			*isArr = false
 		}
 	}
 	return nil

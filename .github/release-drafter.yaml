@@ -1,0 +1,8 @@
+---
+categories:
+  - title: 🦫 Go
+    labels:
+      - go
+template: |
+  ## What's Changed
+  $CHANGES
