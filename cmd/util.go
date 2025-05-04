@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -24,14 +23,4 @@ func configureLogger(level string) error {
 	zerolog.SetGlobalLevel(logLevel)
 	log.Info().Msgf("setting log-level: %#v", logLevel.String())
 	return nil
-}
-
-func formatCamelCase(isArr *bool, indentCount int, s string) string {
-	// TODO: dash formatting should NOT be included here.
-	dash := ""
-	if *isArr {
-		dash = "- "
-		*isArr = false
-	}
-	return strings.Repeat(" ", indentCount) + dash + strings.ToLower(s[:1]+s[1:])
 }

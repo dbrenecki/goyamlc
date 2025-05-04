@@ -22,8 +22,9 @@ type Kingdom struct {
 	// Some animal type.
 	Animal Animal
 	// Name represents the Kingdoms name.
-	Name   string
-	Plants []Plant
+	Name    string
+	Plants  []Plant
+	SomeInt []int64
 }
 
 type Plant struct {

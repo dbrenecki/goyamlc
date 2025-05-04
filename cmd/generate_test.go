@@ -6,7 +6,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -16,7 +15,7 @@ const (
 )
 
 func Test_generate(t *testing.T) {
-	err := configureLogger("info")
+	err := configureLogger("debug")
 	require.NoError(t, err)
 
 	testHook := func(fs *token.FileSet, f *ast.File) (err error) {
@@ -30,8 +29,6 @@ func Test_generate(t *testing.T) {
 				err = tmpErr
 			}
 		}()
-
-		log.Info().Msg("create ast obj tree")
 
 		err = ast.Fprint(out, fs, f, nil)
 		if err != nil {
