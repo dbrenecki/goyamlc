@@ -2,10 +2,12 @@ package test
 
 import "fmt"
 
+// Example comment for animal
 type Animal struct {
 	Name string
-	Legs int
-	// Species Species
+	// Numb of legs
+	Legs    int
+	Species Species
 }
 
 var _ = somefunc
@@ -16,34 +18,41 @@ func somefunc() {
 
 // This is the root struct
 // Second line for rootstruct
-type KingdomHouse struct {
-	// Some animal
+type Kingdom struct {
+	// Some animal type.
 	Animal Animal
+	// Name represents the Kingdoms name.
 	Name   string
-	// Plants []Plant
+	Plants []Plant
 }
 
-// type Plant struct {
-// 	Ipsom     string
-// 	Color     []string
-// 	MiniPlant MiniPlant
-// }
+type Plant struct {
+	Ipsom string
+	Color []string
+	// MiniPlant MiniPlant
+}
 
-// type Species struct {
-// 	Something map[string]any
-// 	Continent string
-// 	IsExtinct bool
-// }
+// // plants:
+//     ipsom: string
+//     color:
+//       - string
+
+type Species struct {
+	Something map[string]any
+	Continent string
+	IsExtinct bool
+}
 
 // type MiniPlant struct {
 // 	PlantType    string
-// 	LeaveTypes   []LeaveTypes
+// 	LeaveTypes   []LeaveType
 // 	AnotherThing AnotherThing
 // 	StrangeMap   map[string]Blah
 // }
 
-// type LeaveTypes struct {
-// 	Color string
+// type LeaveType struct {
+// 	Color  string
+// 	Color2 string
 // }
 
 // type AnotherThing struct {

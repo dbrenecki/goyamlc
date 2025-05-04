@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"errors"
@@ -6,7 +6,6 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"os"
 
 	"github.com/rs/zerolog/log"
 )
@@ -52,7 +51,7 @@ func findRootStructs(f *ast.File) ([]string, error) {
 
 }
 
-func generate(typesPath string) error {
+func generate(typesPath string, testHook func(fs *token.FileSet, f *ast.File) error) error {
 	fs := token.NewFileSet()
 
 	f, err := parser.ParseFile(fs, typesPath, nil, parser.AllErrors|parser.ParseComments)
@@ -60,20 +59,9 @@ func generate(typesPath string) error {
 		return err
 	}
 
-	// TODO: this block only needed for tests
-	out, err := os.Create("test/data/types.txt")
-	if err != nil {
-		return err
+	if testHook != nil {
+		testHook(fs, f)
 	}
-	defer out.Close()
-
-	log.Info().Msg("create ast obj tree")
-
-	err = ast.Fprint(out, fs, f, nil)
-	if err != nil {
-		return err
-	}
-	//
 
 	rootStructs, err := findRootStructs(f)
 	if err != nil {

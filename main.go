@@ -1,11 +1,7 @@
 package main
 
-func main() {
-	if err := ConfigureLogger("debug"); err != nil {
-		panic(err)
-	}
+import "github.com/dbrenecki/goyamlc/cmd"
 
-	if err := generate(""); err != nil {
-		panic(err)
-	}
+func main() {
+	cmd.Execute()
 }
