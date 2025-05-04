@@ -7,7 +7,7 @@ goyamlc uses the Abstract Syntax Tree (AST) to maintain comments from structs to
 This is useful for generating docs or examples in yaml whilst maintaining a single location of comments.
 
 
-## How To use
+## How To Use
 
 ```bash
 go install github.com/dbrenecki/goyamlc@latest
@@ -18,9 +18,9 @@ Define your structs in one file which is your `--types-path`
 ```go
 type Foo struct {
     // some field
-    x string `yaml:"x"`
+    x string
     // some other field
-    y string `yaml:"y"`
+    y string
 }
 ```
 
