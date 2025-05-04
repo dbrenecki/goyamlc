@@ -23,4 +23,4 @@ foo:
   y: string
 ```
 
-More complex examples would include nested structs and multiple root structs.
+See the [example](./test/data/generated.yaml) for a more complete example which includes nested types.
