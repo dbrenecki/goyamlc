@@ -24,3 +24,9 @@ foo:
 ```
 
 See the [example](./test/data/generated.yaml) for a more complete example which includes nested types.
+
+
+## Upcoming Features
+
+- Ignore unexported fields
+- Improve how map types are represented
