@@ -12,19 +12,24 @@ import (
 )
 
 const (
-	typesPath = "test/data/types.go"
+	typesPath = "../test/data/types.go"
 )
 
 func Test_generate(t *testing.T) {
 	err := configureLogger("info")
 	require.NoError(t, err)
 
-	testHook := func(fs *token.FileSet, f *ast.File) error {
-		out, err := os.Create("test/data/types.txt")
+	testHook := func(fs *token.FileSet, f *ast.File) (err error) {
+		out, err := os.Create("../test/data/types.txt")
 		if err != nil {
 			return err
 		}
-		defer out.Close()
+
+		defer func() {
+			if tmpErr := out.Close(); tmpErr != nil || err != nil {
+				err = tmpErr
+			}
+		}()
 
 		log.Info().Msg("create ast obj tree")
 
@@ -35,6 +40,6 @@ func Test_generate(t *testing.T) {
 		return nil
 	}
 
-	err = generate(typesPath, testHook)
+	err = Generate(typesPath, testHook)
 	assert.NoError(t, err)
 }

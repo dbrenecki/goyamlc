@@ -9,12 +9,13 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/dbrenecki/goyamlc/pkg/util"
-
 	"github.com/rs/zerolog/log"
+
+	"github.com/dbrenecki/goyamlc/pkg/util"
 )
 
 func createStructsForYaml(rootStructs []string, f *ast.File) (err error) {
+	// TODO: this should be cobra input
 	file, err := os.Create("../test/data/example.yaml")
 
 	defer func() {
@@ -32,7 +33,7 @@ func createStructsForYaml(rootStructs []string, f *ast.File) (err error) {
 
 	isArr := util.PtrTo(false)
 	for _, name := range rootStructs {
-		if err := walkStructFields(0, name, w, f.Decls[:], isArr); err != nil {
+		if err := walkAst(0, name, w, f.Decls[:], isArr); err != nil {
 			return err
 		}
 	}
@@ -43,7 +44,8 @@ func createStructsForYaml(rootStructs []string, f *ast.File) (err error) {
 	return nil
 }
 
-func walkStructFields(indentCount int, name string, w *bufio.Writer, decls []ast.Decl, isArr *bool) error {
+// walkAst recursively walks the Abstract Syntax Tree
+func walkAst(indentCount int, name string, w *bufio.Writer, decls []ast.Decl, isArr *bool) error {
 	for i, decl := range decls {
 		genDecl, ok := decl.(*ast.GenDecl)
 		if !ok {
@@ -114,7 +116,7 @@ func walkStructFields(indentCount int, name string, w *bufio.Writer, decls []ast
 					fmt.Println("Deleting decl", newDecls[i])
 					newDecls = slices.Delete(newDecls, i, i+1)
 
-					if err = walkStructFields(indentCount, field.Names[0].Name, w, newDecls, isArr); err != nil {
+					if err = walkAst(indentCount, field.Names[0].Name, w, newDecls, isArr); err != nil {
 						return err
 					}
 				} else {
@@ -160,7 +162,9 @@ func walkStructFields(indentCount int, name string, w *bufio.Writer, decls []ast
 					newDecls = slices.Delete(newDecls, i, i+1)
 					*isArr = true
 					fmt.Println("isArr", *isArr)
-					walkStructFields(indentCount, field.Names[0].Name, w, newDecls, isArr)
+					if err = walkAst(indentCount, field.Names[0].Name, w, newDecls, isArr); err != nil {
+						return err
+					}
 					*isArr = false
 				}
 			}

@@ -5,7 +5,7 @@ func Execute() {
 		panic(err)
 	}
 
-	if err := generate("", nil); err != nil {
+	if err := Generate("", nil); err != nil {
 		panic(err)
 	}
 }
