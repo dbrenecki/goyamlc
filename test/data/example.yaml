@@ -13,7 +13,7 @@ animal:
     plant:
       ipsom: string
       color:
-array of string
+        - string
       species:
         something: map[string]any
         continent: string

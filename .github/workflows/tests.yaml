@@ -8,7 +8,7 @@ concurrency:
 on:
   pull_request:
     paths:
-      - .github/workflows/test.yaml
+      - .github/workflows/*
       - "**/*.go"
       - go.*
 

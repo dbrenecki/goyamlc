@@ -27,6 +27,7 @@ func configureLogger(level string) error {
 }
 
 func formatCamelCase(isArr *bool, indentCount int, s string) string {
+	// TODO: dash formatting should NOT be included here.
 	dash := ""
 	if *isArr {
 		dash = "- "

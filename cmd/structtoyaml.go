@@ -3,7 +3,6 @@ package cmd
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"go/ast"
 	"os"
 	"slices"
@@ -67,24 +66,19 @@ func walkAst(indentCount int, name string, w *bufio.Writer, decls []ast.Decl, is
 			}
 		}
 
-		fmt.Println("SECOND isArr", *isArr)
-		fmt.Println("typespec", typeSpec)
 		if typeSpec == nil {
 			continue
 		}
-		fmt.Println("tyename", typeSpec.Name.Name, name)
 
 		// write struct comment
 		if genDecl.Doc != nil {
 			for _, c := range genDecl.Doc.List {
-				fmt.Println("COMMENT", c)
 				if err := writeComment(indentCount, c, w); err != nil {
 					return err
 				}
 			}
 		}
 
-		fmt.Println("inside walkstruct", *isArr)
 		_, err := w.WriteString(formatCamelCase(isArr, indentCount, typeSpec.Name.Name) + ":\n")
 		if err != nil {
 			return err
@@ -93,6 +87,7 @@ func walkAst(indentCount int, name string, w *bufio.Writer, decls []ast.Decl, is
 		structType, ok := typeSpec.Type.(*ast.StructType)
 		if !ok {
 			log.Debug().Msgf(`ast.TypeSpec: "%T" is not of "*ast.StrucType" type, skipping`, structType)
+			// TODO: rm
 			return errors.New("somethign EWNWT WRONG")
 		}
 
@@ -113,7 +108,6 @@ func walkAst(indentCount int, name string, w *bufio.Writer, decls []ast.Decl, is
 			case *ast.Ident:
 				if t.Obj != nil {
 					newDecls := decls[:]
-					fmt.Println("Deleting decl", newDecls[i])
 					newDecls = slices.Delete(newDecls, i, i+1)
 
 					if err = walkAst(indentCount, field.Names[0].Name, w, newDecls, isArr); err != nil {
@@ -152,16 +146,15 @@ func walkAst(indentCount int, name string, w *bufio.Writer, decls []ast.Decl, is
 
 				if identElt.Obj == nil {
 					_, err = w.WriteString(
-						formatCamelCase(isArr, indentCount, field.Names[0].Name) + ":\n" + "array of " + identElt.Name + "\n")
+						formatCamelCase(
+							isArr, indentCount, field.Names[0].Name) + ":\n" + strings.Repeat(" ", indentCount+2) + "- " + identElt.Name + "\n")
 					if err != nil {
 						return err
 					}
 				} else {
 					newDecls := decls[:]
-					fmt.Println("Deleting decl", newDecls[i])
 					newDecls = slices.Delete(newDecls, i, i+1)
 					*isArr = true
-					fmt.Println("isArr", *isArr)
 					if err = walkAst(indentCount, field.Names[0].Name, w, newDecls, isArr); err != nil {
 						return err
 					}
