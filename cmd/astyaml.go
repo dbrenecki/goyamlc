@@ -101,8 +101,6 @@ func (w formatWriter) walkDecl(name string, decls []ast.Decl, isArr *bool) error
 			return err
 		}
 
-		// newDecls := decls[:]
-		// newDecls = slices.Delete(newDecls, i, i+1)
 	}
 	return nil
 }
@@ -128,8 +126,6 @@ func (w formatWriter) walkTypeSpec(fields []*ast.Field, isArr *bool) error {
 				if err = w.writeField(field.Names[0].Name, t.Name, isObj, isArr); err != nil {
 					return err
 				}
-				// newDecls := decls[:]
-				// newDecls = slices.Delete(newDecls, i, i+1)
 				typeSpec, ok := t.Obj.Decl.(*ast.TypeSpec)
 				if !ok {
 					return fmt.Errorf(`"%T" is not a "*ast.TypeSpec" type`, t.Obj.Decl)
@@ -193,18 +189,6 @@ func (w formatWriter) walkTypeSpec(fields []*ast.Field, isArr *bool) error {
 				if err = w.walkTypeSpec(structType.Fields.List, isArr); err != nil {
 					return err
 				}
-
-				// if err = w.writeField(field.Names[0].Name, identElt.Name, isObj, isArr); err != nil {
-				// 	return err
-				// }
-
-				// identElt.Obj.Type
-
-				// newDecls := decls[:]
-				// newDecls = slices.Delete(newDecls, i, i+1)
-				// if err = w.walkAst(field.Names[0].Name, newDecls, isArr); err != nil {
-				// 	return err
-				// }
 			}
 			*isArr = false
 		}
