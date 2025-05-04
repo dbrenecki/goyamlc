@@ -1,0 +1,15 @@
+---
+version: 2
+run:
+  timeout: 5m
+linters:
+  default: standard
+formatters:
+  enable:
+    - gci
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/dbrenecki/goyamlc)

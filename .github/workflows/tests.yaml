@@ -1,0 +1,35 @@
+---
+name: ⛳️ Tests
+
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/*
+      - "**/*.go"
+      - go.*
+
+jobs:
+  # TODO: add autocommit job
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          cache: false
+          go-version-file: go.mod
+
+      - name: 🧦 GolangCi-Lint
+        run: make golint GO_LINT_FIX= LINT_DISABLE_ERR=false
+        continue-on-error: true
+
+      - name: 🐚 Action Lint
+        run: make actionlint
+        continue-on-error: true
+
+      - run: make test
