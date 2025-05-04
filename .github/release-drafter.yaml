@@ -1,0 +1,30 @@
+---
+name-template: v$RESOLVED_VERSION 🪃
+tag-template: v$RESOLVED_VERSION
+autolabeler:
+  - label: 'bug'
+    title:
+      - '/fix'
+  - label: 'feature'
+    title:
+      - '/feature\/.+/'
+  - label: 'cleanup'
+    title:
+      - '/cleanup'
+      - '/refactor'
+categories:
+  - title: 🚀 Features
+    labels:
+      - feature
+  - title: 🐛 Bug Fixes
+    labels:
+      - fix
+  - title: 🧰 Maintenance
+    label: cleanup
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+version-resolver:
+  default: patch
+template: |
+  ## Changes
+
+  $CHANGES

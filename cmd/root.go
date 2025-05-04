@@ -16,6 +16,7 @@ var (
 			if err != nil {
 				return err
 			}
+
 			if typesPath == "" {
 				fmt.Fprintln(os.Stderr, errors.New(`"--types-path" must be set`))
 				os.Exit(1)
@@ -25,7 +26,8 @@ var (
 			if err != nil {
 				return err
 			}
-			if typesPath == "" {
+
+			if genPath == "" {
 				fmt.Fprintln(os.Stderr, errors.New(`"--gen-path" must be set`))
 				os.Exit(1)
 			}
@@ -34,6 +36,7 @@ var (
 				return err
 			}
 
+			fmt.Println("TEST")
 			if err := Generate(typesPath, genPath, nil); err != nil {
 				return err
 			}
